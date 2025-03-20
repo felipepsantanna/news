@@ -19,14 +19,14 @@ export default async function handler(req, res) {
       const result = parser.parse(xml);
       const items = result.rss.channel.item;
 
-
       const flamengoNews = items.map((item) => ({
         title: item.title,
         link: item.link,
         pubDate: item.pubDate,
-        description: item.description,
+        description: item["content:encoded"].replace(item["content:encoded"].split("<hr />")[0], "") 
       }))
 
-      console.log(items);
-      return res.status(200).json(items);
+
+      console.log(flamengoNews);
+      return res.status(200).json(flamengoNews);
   }
