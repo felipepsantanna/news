@@ -19,6 +19,6 @@ export default async function handler(req, res) {
     let insertQuery = `insert into control (source, link) values (${item.source}, '${item.link}')`;
     const [respInsert] = await db.query(insertQuery);
 
-    return res.status(201).json({ message: "ok" });
+    return res.status(201).json(respInsert);
 }
 

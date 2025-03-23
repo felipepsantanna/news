@@ -24,7 +24,6 @@ export default async function handler(req, res) {
     source: 1,
     title: item.title,
     link: item.link,
-    pubDate: item.pubDate,
     description: item["content:encoded"].replace(item["content:encoded"].split("<hr />")[0], "")
   }));
 
@@ -37,10 +36,30 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify(parafrasear[i]),
     });
-    console.log(todo.status);
 
     if (todo.status === 201) {
-      //call parafrasear;
+
+      const toparafrasear = await fetch(`${process.env.FLAURL_BASE}/api/parafrasear`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(parafrasear[i]),
+      });
+      const postParafrasear = await toparafrasear.json();
+      console.log(postParafrasear)
+      if (toparafrasear.status === 200) {
+        const towordpress = await fetch(`${process.env.FLAURL_BASE}/api/wordpress`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(postParafrasear),
+        });
+      } else {
+        //remove from control
+      }
+
       return res.status(201).json(parafrasear[i]);
       break;
     }
@@ -48,3 +67,5 @@ export default async function handler(req, res) {
   }
   return res.status(200).json(parafrasear[0].pubDate);
 }
+
+
