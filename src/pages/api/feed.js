@@ -47,7 +47,6 @@ export default async function handler(req, res) {
         body: JSON.stringify(parafrasear[i]),
       });
       const postParafrasear = await toparafrasear.json();
-      console.log(postParafrasear)
       if (toparafrasear.status === 200) {
         const towordpress = await fetch(`${process.env.FLAURL_BASE}/api/wordpress`, {
           method: 'POST',
@@ -63,7 +62,6 @@ export default async function handler(req, res) {
       return res.status(201).json(parafrasear[i]);
       break;
     }
-    console.log(i)
   }
   return res.status(200).json(parafrasear[0].pubDate);
 }

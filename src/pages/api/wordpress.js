@@ -31,14 +31,13 @@ export default async function handler(req, res) {
                                             NOW(),'',
                                             0, '', 0, 'post',
                                             '', 0)`;
-        console.log(insertQuery);
         const [respInsert] = await db.query(insertQuery);
 
         if (respInsert.insertId > 0) {
             const insMeta = `INSERT INTO wp_postmeta(post_id, meta_key, meta_value) VALUES (${respInsert.insertId},'_thumbnail_id','30')`;
             const [respInsMeta] = await db.query(insMeta);
 
-            const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0')`;
+            const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0)`;
             const [respIntCat] = await db.query(intCat);
 
         }
@@ -51,13 +50,13 @@ export default async function handler(req, res) {
 }
 
 function toUrl(texto) {
-    texto = texto.Replace(" / ", "/");
-    texto = texto.Replace(" \\ ", "\\");
-    texto = texto.Replace('.', '-');
-    texto = texto.Replace('/', '-');
+    texto = texto.replaceAll(" / ", "/");
+    texto = texto.replaceAll(" \\ ", "\\");
+    texto = texto.replaceAll('.', '-');
+    texto = texto.replaceAll('/', '-');
 
     // Substitui múltiplos espaços por um único hífen
-    texto = texto.replace(/\s+/g, "-").trim();
+    texto = texto.replaceAll(/\s+/g, "-").trim();
 
     // Remove acentos e caracteres especiais
     const comAcento = "áâãàéêëíóôõúüçÁÂÃÀÉÊËÍÓÔÕÚÜÇ";
@@ -65,16 +64,16 @@ function toUrl(texto) {
 
     for (let i = 0; i < comAcento.length; i++) {
         const regex = new RegExp(comAcento[i], 'g');
-        texto = texto.replace(regex, semAcento[i]);
+        texto = texto.replaceAll(regex, semAcento[i]);
     }
 
     // Remove tudo que não for alfanumérico, barra ou hífen (-)
-    texto = texto.replace(/[^a-zA-Z\d\-/]/g, "");
+    texto = texto.replaceAll(/[^a-zA-Z\d\-/]/g, "");
 
     // Substitui múltiplos hífens por um único
-    texto = texto.replace(/-+/g, "-");
+    texto = texto.replaceAll(/-+/g, "-");
 
-    texto = texto.replace(/[-.!@#$%&/{()}=?+]+$/g, '');
+    texto = texto.replaceAll(/[-.!@#$%&/{()}=?+]+$/g, '');
 
     return texto.toLowerCase();
 }
