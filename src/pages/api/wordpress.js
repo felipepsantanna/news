@@ -37,6 +37,10 @@ export default async function handler(req, res) {
         if (respInsert.insertId > 0) {
             const insMeta = `INSERT INTO wp_postmeta(post_id, meta_key, meta_value) VALUES (${respInsert.insertId},'_thumbnail_id','30')`;
             const [respInsMeta] = await db.query(insMeta);
+
+            const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0')`;
+            const [respIntCat] = await db.query(intCat);
+
         }
         return res.status(200).json({ message: insertQuery });
     }
@@ -46,7 +50,31 @@ export default async function handler(req, res) {
     }
 }
 
-function toUrl(title) {
-    return title.toLowerCase().replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '');
+function toUrl(texto) {
+    texto = texto.Replace(" / ", "/");
+    texto = texto.Replace(" \\ ", "\\");
+    texto = texto.Replace('.', '-');
+    texto = texto.Replace('/', '-');
+
+    // Substitui múltiplos espaços por um único hífen
+    texto = texto.replace(/\s+/g, "-").trim();
+
+    // Remove acentos e caracteres especiais
+    const comAcento = "áâãàéêëíóôõúüçÁÂÃÀÉÊËÍÓÔÕÚÜÇ";
+    const semAcento = "aaaaeeeiooouucAAAAEEEIOOOUUC";
+
+    for (let i = 0; i < comAcento.length; i++) {
+        const regex = new RegExp(comAcento[i], 'g');
+        texto = texto.replace(regex, semAcento[i]);
+    }
+
+    // Remove tudo que não for alfanumérico, barra ou hífen (-)
+    texto = texto.replace(/[^a-zA-Z\d\-/]/g, "");
+
+    // Substitui múltiplos hífens por um único
+    texto = texto.replace(/-+/g, "-");
+
+    texto = texto.replace(/[-.!@#$%&/{()}=?+]+$/g, '');
+
+    return texto.toLowerCase();
 }
