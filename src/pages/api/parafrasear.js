@@ -10,8 +10,10 @@ export default async function handler(req, res) {
     try {
         const item = req.body;
         const chatTitle = await getGroqChatCompletion("parafraseie o título, escolha a melhor opção para um title SEO e me devolva apenas o texto da melhor opção" + item.title);
-        const chatDescription = await getGroqChatCompletion("parafraseie o texto com as melhores técnicas de SEO semantico e SEO técnico usando apenas h2, mantenha as tags html, remova todos os links e remova a parte 'ATENÇÃO: O post apareceu primeiro em', retorne apenas com o artigo que será publicado " + item.description);
-
+        const chatDescription = await getGroqChatCompletion(`Você é um assistente de SEO especializado com foco em criação de conteúdos otimizados para ranquear em mecanismos de busca. Você é capaz de gerar textos que sigam práticas avançadas de SEO semantico.
+Substitua todos as tags de títulos e subtitúlos(h3, h4, h5 e h6) pela tag h2
+Não use emojis. Agora parafraseie o texto, mantenha as tags html, remova todos os links e remova a parte 'ATENÇÃO: O post apareceu primeiro em', retorne apenas com o artigo que será publicado do seguinte texto:` + item.description);
+        //Sempre que possível, crie pelo menos um link para algum artigo em noticiasdofla.com.br, não crie para a home do site, apenas para outro artigo interno, você precisa conferir se esse artigo existe no site noticiasdofla.com.br.
         const resp = {
             source: 1,
             title: chatTitle.choices[0]?.message?.content,
