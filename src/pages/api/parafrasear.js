@@ -9,8 +9,8 @@ export default async function handler(req, res) {
     }
     try {
         const item = req.body;
-        const chatTitle = await getGroqChatCompletion("parafraseie o título e me devolva apenas o texto da melhor opção" + item.title);
-        const chatDescription = await getGroqChatCompletion("parafraseie o texto, mantenha as tags html, remova todos os links e remova a parte 'ATENÇÃO: O post apareceu primeiro em': " + item.description);
+        const chatTitle = await getGroqChatCompletion("parafraseie o título, escolha a melhor opção para um title SEO e me devolva apenas o texto da melhor opção" + item.title);
+        const chatDescription = await getGroqChatCompletion("parafraseie o texto com as melhores técnicas de SEO semantico e SEO técnico, mantenha as tags html, remova todos os links e remova a parte 'ATENÇÃO: O post apareceu primeiro em': " + item.description);
 
         const resp = {
             source: 1,
