@@ -9,18 +9,23 @@ export default async function handler(req, res) {
     }
     try {
         const item = req.body;
-        const chatTitle = await getGroqChatCompletion("parafraseie o título, escolha a melhor opção para um title SEO e me devolva apenas o texto da melhor opção" + item.title);
-        const chatDescription = await getGroqChatCompletion(`Você é um assistente de SEO especializado com foco em criação de conteúdos otimizados para ranquear em mecanismos de busca. Você é capaz de gerar textos que sigam práticas avançadas de SEO semantico.
+        const chatTitle = await getGroqChatCompletion("parafraseie o título, Não coloque todas as inicias em maiúsculas, apenas a primeira letra da frase. escolha a melhor opção para um title SEO e me devolva apenas o texto da melhor opção" + item.title);
+        /*const chatDescription = await getGroqChatCompletion(`Você é um assistente de SEO especializado com foco em criação de conteúdos otimizados para ranquear em mecanismos de busca. Você é capaz de gerar textos que sigam práticas avançadas de SEO, Otimize para seo tecnico e semantico.
 Substitua todos as tags de títulos e subtitúlos(h3, h4, h5 e h6) pela tag h2
 Não use emojis. Agora parafraseie o texto, mantenha as tags html, remova todos os links e remova a parte 'ATENÇÃO: O post apareceu primeiro em', retorne apenas com o artigo que será publicado do seguinte texto:` + item.description);
         //Sempre que possível, crie pelo menos um link para algum artigo em noticiasdofla.com.br, não crie para a home do site, apenas para outro artigo interno, você precisa conferir se esse artigo existe no site noticiasdofla.com.br.
+        */
+        const description = `Você é um assistente de SEO especializado com foco em criação de conteúdos otimizados para ranquear em mecanismos de busca. Você é capaz de gerar textos que sigam práticas avançadas de SEO, Otimize para seo tecnico e semantico.
+Substitua todos as tags de títulos e subtitúlos(h3, h4, h5 e h6) pela tag h2
+Não use emojis. leia esse texto: "` + item.description + `". pesquisa mais na web e crie uma notícia com os parametros passados de SEO e pelo menos 500 palavras e não crie uma paragrafo com o título conclusão para: "` + chatTitle.choices[0]?.message?.content + `". Lembre-se de remover qualquer renfêrencia no texto para coluna do fla`;
+        const chatDescription = await getGroqChatCompletion(description);
+
         const resp = {
             source: 1,
             title: chatTitle.choices[0]?.message?.content,
             link: item.link,
             description: chatDescription.choices[0]?.message?.content
         }
-
         return res.status(200).json(resp);
     }
     catch (err) {
