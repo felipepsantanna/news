@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser"
+import * as cheerio from 'cheerio';
 
 export default async function handler(req, res) {
   // Buscar o feed RSS
@@ -28,7 +29,8 @@ export default async function handler(req, res) {
   }));
 
 
-  for (var i = 0; i < parafrasear.length; i++) {
+  for (var i = 0; i < 1; i++) {
+    
     const todo = await fetch(`${process.env.FLAURL_BASE}/api/control`, {
       method: 'POST',
       headers: {

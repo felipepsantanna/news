@@ -1,5 +1,5 @@
 import { createConnection } from "@/lib/db.js";
-import { Tourney } from "next/font/google";
+import * as cheerio from 'cheerio';
 export default async function handler(req, res) {
 
     if (req.method !== 'POST') {
@@ -35,8 +35,65 @@ export default async function handler(req, res) {
 
         if (respInsert.insertId > 0) {
             //add imagem
-            const insMeta = `INSERT INTO wp_postmeta(post_id, meta_key, meta_value) VALUES (${respInsert.insertId},'_thumbnail_id','72')`;
-            const [respInsMeta] = await db.query(insMeta);
+
+            const response = await fetch(parafrasear[i].link);
+            const html = await response.text();
+            const $ = cheerio.load(html);
+
+            // Encontre a div e depois a imagem dentro dela
+            const imageUrl = $('.featured-lightbox-trigger img').attr('src');
+            const imageTitle = $('.featured-lightbox-trigger').attr('data-caption');
+
+            const imageDownloadResponse = await fetch(imageUrl);
+            const imageBuffer = await imageDownloadResponse.arrayBuffer();
+            const imageNodeBuffer = Buffer.from(imageBuffer);
+
+            const mediaApiUrl = `${WORDPRESS_BASE_URL}wp-json/wp/v2/media`;
+            const authHeader = `Basic ${Buffer.from(`${WORDPRESS_API_USERNAME}:${WORDPRESS_APPLICATION_PASSWORD}`).toString('base64')}`;
+
+            const formData = new FormData();
+            const filename = 'testing.png';
+            // No ambiente Node.js, FormData espera um Buffer ou Stream, não um Blob
+            formData.append('file', imageNodeBuffer, { filename: filename, contentType: imageDownloadResponse.headers.get('content-type') || 'image/jpeg' });
+            formData.append('title', imageTitle);
+
+            const uploadResponse = await fetch(mediaApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    // FormData no Node.js com o pacote 'form-data' precisa deste header para multipart/form-data
+                    // O método getHeaders() adiciona o boundary necessário
+                    ...formData.getHeaders(),
+                },
+                body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
+                console.error('Erro detalhado do upload para WordPress:', errorData);
+                throw new Error(`Falha ao fazer upload da imagem para o WordPress: ${uploadResponse.status} - ${errorData.message || 'Erro desconhecido'}`);
+            }
+
+            const uploadedImageData = await uploadResponse.json();
+            const uploadedImageId = uploadedImageData.id;
+            console.log(`Imagem ${uploadedImageId} enviada com sucesso para o WordPress.`);
+
+            // --- PASSO 3: Definir a imagem como thumbnail do post ---
+            const postApiUrl = `${WORDPRESS_BASE_URL}/wp-json/wp/v2/posts/${respInsert.insertId}`;
+
+            const setThumbnailResponse = await fetch(postApiUrl, {
+                method: 'POST', // Ou 'PUT' se for uma atualização completa
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authHeader,
+                },
+                body: JSON.stringify({
+                    featured_media: uploadedImageId,
+                }),
+            });
+
+            //const insMeta = `INSERT INTO wp_postmeta(post_id, meta_key, meta_value) VALUES (${respInsert.insertId},'_thumbnail_id','72')`;
+            //const [respInsMeta] = await db.query(insMeta);
             //add category    
             const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0)`;
             const [respIntCat] = await db.query(intCat);
