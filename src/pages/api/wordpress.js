@@ -114,8 +114,8 @@ export default async function handler(req, res) {
             //const insMeta = `INSERT INTO wp_postmeta(post_id, meta_key, meta_value) VALUES (${respInsert.insertId},'_thumbnail_id','72')`;
             //const [respInsMeta] = await db.query(insMeta);
             //add category    
-            const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0)`;
-            const [respIntCat] = await db.query(intCat);
+            //const intCat = `INSERT INTO wp_term_relationships(object_id, term_taxonomy_id, term_order) VALUES (${respInsert.insertId} , 3 , 0)`;
+            //const [respIntCat] = await db.query(intCat);
 
         }
         return res.status(200).json({ message: insertQuery });
